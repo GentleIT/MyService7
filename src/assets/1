@@ -1,0 +1,95 @@
+<template>
+    <!-- <div class="firstBlock">
+  
+      <h1> {{ message }}</h1>
+      <input type="text" @input="setMessage">
+      <br><br>
+      <div class="button">
+        <button type="button" @click="count+=1">Button</button>
+      </div>
+      <p class="count">{{ count }}</p>
+  
+    </div>
+    <div class="secondBlock">
+  
+      <div class="block">
+        <div class="blockDiv">
+          <p class="bd"><strong>Имя: </strong></p> 
+          <input v-on:input="setName" class="bd" type="text"/>
+        </div>
+        <div class="blockDiv">
+          <p class="bd"><strong>Пароль: </strong></p> 
+          <input v-on:input="setSurname" class="bd" type="password" />
+        </div>
+      </div>
+    </div>
+  
+  
+    <div v-for="i in posts">
+              <p>  Имя: {{i.name}}, Фамилия: {{i.surname}} </p>
+      </div>
+   -->
+  </template>
+  
+  <script>
+    // export default {
+    //   data() {
+    //     return {
+    //       message: 'Hello World',
+    //       count: 0,
+    //       posts: [
+    //         {name: 'Rakhat', surname: 'Nasyrov'},
+    //         {name: 'Ramat', surname: 'Eldos'}
+    //       ],
+    //       name: '',
+    //       surname: ''
+    //     }
+    //   },
+    //   methods: {
+    //     setMessage(value){
+    //       this.message = value.target.value
+    //     },
+    //     setValue() {
+    //       this.count += 1
+    //     },
+    //     setName(event) {
+    //       this.name = event.target.value
+    //     },
+    //     setSurname(event) {
+    //       this.surname = event.target.value
+    //     }
+    //   }
+    // }
+  </script>
+  <script></script>
+  
+  <style>
+    /* * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .bd {
+      margin: 10px;
+      padding: 0px;
+    }
+    .blockDiv {
+      display: flex;
+      justify-content: center;
+      padding: 0px;
+    }
+    .block {
+      padding: 0px;
+      background-color: rgb(37, 139, 0);
+      border: 2px solid black;
+    }
+    .button {
+      display: flex;
+      justify-content: center;
+      width: 100px; 
+      height: 50px
+    }
+    body {
+      background-color: rgb(247, 195, 27);
+    } */
+  </style>
