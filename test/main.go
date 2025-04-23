@@ -1,20 +1,23 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"log"
+	"time"
 )
 
 func main() {
 
-	resp, err := http.Get("https://gobyexample.com")
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
+	t := time.Now()
+	log.Print(t.Format("2006-01-02"))
 
-	fmt.Println("Response status:", resp.Status)
-	fmt.Println(resp)
+	// resp, err := http.Get("https://gobyexample.com")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer resp.Body.Close()
+
+	// fmt.Println("Response status:", resp.Status)
+	// fmt.Println(resp)
 
 	// scanner := bufio.NewScanner(resp.Body)
 	// for i := 0; scanner.Scan() && i < 5; i++ {
