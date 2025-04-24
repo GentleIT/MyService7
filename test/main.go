@@ -2,13 +2,16 @@ package main
 
 import (
 	"log"
-	"time"
+	"net/http"
 )
 
 func main() {
 
-	t := time.Now()
-	log.Print(t.Format("2006-01-02"))
+	// t := time.Now()
+	// log.Print(t.Format("2006-01-02"))
+
+	resp, _ := http.Get("https://data.fixer.io/api/tenge")
+	log.Println(resp)
 
 	// resp, err := http.Get("https://gobyexample.com")
 	// if err != nil {

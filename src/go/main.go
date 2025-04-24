@@ -38,7 +38,7 @@ func main() {
 
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
-		log.Println("Не удалось подключиться к базе postgres")
+		log.Println("Не удалось подключиться к базе postgres 🔴")
 	}
 	defer db.Close()
 
@@ -46,9 +46,10 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	} else {
-		log.Println("Подключение с базой данных установлено")
+		log.Println("Подключение с базой данных установлено 🟢")
 	}
 
+	http.HandleFunc("/getAll", GetEquipment)
 	http.HandleFunc("/find", FindEquipment)
 	http.HandleFunc("/equipment", AddEquipment)
 	http.HandleFunc("/authorize", Authorization)
@@ -56,7 +57,12 @@ func main() {
 }
 
 func Authorization(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, token")
+
 	var authTemp Auth
+	log.Println("Someone logging in")
 
 	if r.Method == http.MethodPost {
 		err := json.NewDecoder(r.Body).Decode(&authTemp)
@@ -80,24 +86,32 @@ func SignUpCheck(log string, pass string) bool { // Это должно рабо
 }
 
 func AddEquipment(w http.ResponseWriter, r *http.Request) {
-	var newEquipment Equipment
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, token")
 
+	var newEquipment Equipment
+	log.Println("Someone using AddEquipment")
 	if r.Method == http.MethodPost && r.Header.Get("token") == "123456789" {
 		w.Write([]byte("Successfully logged into AddEquipment"))
+
 		err := json.NewDecoder(r.Body).Decode(&newEquipment)
 		if err != nil {
 			log.Println(err)
 		}
 
 		db.Exec("INSERT INTO equipment (name, driver, day, gps, parked) values ($1, $2, $3, $4, $5)", newEquipment.Name, newEquipment.Driver, minLogic.TimeFormat(time.Now()), minLogic.GetRandomGPS(), newEquipment.Parked)
-		defer db.Close()
 	} else {
 		w.Write([]byte("400"))
 	}
 }
 
 func FindEquipment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, token")
+
 	var resp Equipment
+	log.Println("Someone using FindEquipment")
+
 	if r.Method == http.MethodGet && r.Header.Get("token") == "123456789" {
 		w.Write([]byte("Successfully logged into FindEquipment\n"))
 
@@ -114,47 +128,50 @@ func FindEquipment(w http.ResponseWriter, r *http.Request) {
 		defer dbres.Close()
 
 		equipments := []Equipment{}
-		for dbres.Next() {
-			p := Equipment{}
-			err := dbres.Scan(&p.ID, &p.Name, &p.Driver, &p.Day, &p.Gps, &p.Parked)
-			if err != nil {
-				log.Println(err, "dbres.Next() problem")
-				continue
-			}
-			equipments = append(equipments, p)
+		if err = json.NewEncoder(w).Encode(ReadRows(dbres, equipments)); err != nil { // Шифровка
+			log.Println("Problem with delievering information 🔴: ", err)
 		}
-
-		json.NewEncoder(w).Encode(equipments) // Шифровка
-		// byteDb, _ := json.MarshalIndent(equipments, "", "  ")
-		// w.Write([]byte(byteDb))
 	} else {
 		w.Write([]byte("400"))
 	}
 }
 
-func GetEquipment(w http.ResponseWriter, r *http.Request) { // А нужно ли мне чтение это?
-	if r.Method == http.MethodGet && r.Header.Get("token") == "123456789" {
+func GetEquipment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, token") // Честно сказать - я не знаю как это решило мои проблемы. CORS? What?
 
+	log.Println("Someone using GetEquipment")
+
+	if r.Method == http.MethodGet && r.Header.Get("token") == "123456789" {
+		rows, _ := db.Query("SELECT * FROM equipment")
+
+		equipment := []Equipment{}
+		err := json.NewEncoder(w).Encode(ReadRows(rows, equipment))
+		if err != nil {
+			log.Println(err, "GetEquipment problem 🔴")
+		}
+	} else {
+		json.NewEncoder(w).Encode("400")
 	}
 }
 
-/*
-	База:
-		name | driver | day | gps | parked
-*/
+func ReadRows(rows *sql.Rows, eq []Equipment) []Equipment {
+	for rows.Next() {
+		p := Equipment{}
+		err := rows.Scan(&p.ID, &p.Name, &p.Driver, &p.Day, &p.Gps, &p.Parked)
+		if err != nil {
+			log.Println(err, rows)
+		}
+		eq = append(eq, p)
+	}
+	return eq
+}
 
 /*
---- Начало
-	- Нужно чтоб через постмэн отправился логин и пароль на /login
-	- Сервер проверил данные
-	- Ответил Входом или не входом сообщением ок не ок.
-	- После этого загорается флаг isAuthinticated и можно использовать что-то далее.
-	= ВСЁ ЭТА КОММУНИКАЦИЯ ПРОХОДИТ ЧЕРЕЗ JSON.
---- Законечено
-	- Добавить новый /equipment который принимает JSON с нужными полями для техники
-	- Добавить базу данных Postgres для сохранения добавленных данных в ней (нужно отправку реализовать)
-	- Доступ к эндпоинту /equipment должен проходить через токен
---- Закончено
-	- Изменение машины или водителя через новый эндпоинт.
-		= Клиент сможет ввести в body одно поле с драйвером или машиной либо двух. Для чего? Для изменения одного или двух из них.
+	Смайлики для отладки:
+	🔴	🟡	🟢	🔵
+
+	Изучение:
+		- Что такое CORS.
+		- Пробовать на Vue что-то поделать.
 */

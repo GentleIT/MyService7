@@ -5,12 +5,21 @@
   <title>my Vue.js</title>
   <meta charset="utf-8" />
   <style>
-    body {
+    * {
       margin: 0;
-      display: flex;
-      flex-direction: column;
+      padding: 0;
+    }
+
+    #app   {
+      width: 100%;
       min-height: 100vh;
+      margin-top: 100px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      top: 50%;
     }
 
     header {
@@ -31,19 +40,12 @@
     header .contact {
       font-size: 16px;
     }
-
-    #app {
-      flex: 1;
-      padding: 20px;
-    }
-
     footer {
-      background-color: #f3f4f6;
-      color: #4b5563;
-      text-align: center;
-      padding: 15px 0;
-      font-size: 14px;
-      border-top: 1px solid #e5e7eb;
+      background-color: green;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   </style>
 </head>
