@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -18,7 +19,7 @@ type Auth struct {
 }
 
 type token struct {
-	Token int `json:"token"` // Не уверен что здесь нужно добавлять тег. Я ведь отправляю а не читаю
+	Token int `json:"token"`
 }
 
 type Equipment struct {
@@ -49,6 +50,7 @@ func main() {
 		log.Println("Подключение с базой данных установлено 🟢")
 	}
 
+	http.HandleFunc("/getWeather", GetWeather)
 	http.HandleFunc("/getAll", GetEquipment)
 	http.HandleFunc("/find", FindEquipment)
 	http.HandleFunc("/equipment", AddEquipment)
@@ -71,7 +73,7 @@ func Authorization(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 		}
 		if enter := SignUpCheck(authTemp.Login, authTemp.Password); enter { // Почему-то у меня чувство, будто я наговнокодил
-			byteToken, _ := json.MarshalIndent(token{Token: 123456789}, "", "") // Не думаю что indent стоит использовать, но всё же
+			byteToken, _ := json.MarshalIndent(token{Token: 123456789}, "", "") // Не думаю что indent стоит использовать, но всё же | В целом, это ни на что не повлияло
 			w.Write([]byte("You've successfully entered to the system\n"))
 			w.Write(byteToken)
 		}
@@ -138,7 +140,7 @@ func FindEquipment(w http.ResponseWriter, r *http.Request) {
 
 func GetEquipment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, token") // Честно сказать - я не знаю как это решило мои проблемы. CORS? What?
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, token") // Вместо того чтобы повторять постоянно, лучше было бы создать дополнительный обработчик для каждого запроса для проверки OptionsMethod.
 
 	log.Println("Someone using GetEquipment")
 
@@ -152,6 +154,22 @@ func GetEquipment(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		json.NewEncoder(w).Encode("400")
+	}
+}
+
+func GetWeather(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	log.Println("Someone's using GetWeather")
+	if r.Method == http.MethodGet {
+		resp, _ := http.Get("https://wttr.in/Алматы?format=3")
+
+		body, _ := io.ReadAll(resp.Body)
+
+		err := json.NewEncoder(w).Encode(map[string]string{"weather": string(body[0:29])}) // Идея обернуть в map для имитации json пренадлежит ChatGPT | О Великий Чат, спасибо за небо над головой.
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
